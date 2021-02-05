@@ -62,6 +62,7 @@ pub struct CommentCreatedEvent {
     pub id: usize,
     pub target: CommentTarget,
     pub body: String,
+    pub commenter_user_login: String, // commenter username
 }
 
 #[derive(Debug)]
@@ -293,6 +294,10 @@ impl<T: Bot> Dispatcher<T> {
                     id: event["event"]["comment"]["id"].as_u64().unwrap() as usize,
                     target,
                     body: event["event"]["comment"]["body"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                    commenter_user_login: event["event"]["comment"]["user"]["login"]
                         .as_str()
                         .unwrap()
                         .to_string(),

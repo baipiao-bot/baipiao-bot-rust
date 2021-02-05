@@ -37,7 +37,7 @@ impl Bot for CommentBot {
             event.id,
             "我 劝 开发者耗子为之，耗耗反思，不要再犯这样的错误，小错误啊",
         )
-        .await
+            .await
     }
 
     async fn on_issue_closed(&self, repo: Repository, issue_id: usize) {
@@ -54,14 +54,24 @@ impl Bot for CommentBot {
                 event.user
             ),
         )
-        .await
+            .await
     }
 
     async fn on_comment_created(&self, repo: Repository, event: CommentCreatedEvent) {
         if event.body.contains("@baipiao-bot") {
-            self.comment(repo, event.target.id(), &format!("发生甚么事了"))
-                .await
+            if event.body.to_lowercase().contains("nsml") {
+                self.comment(repo,
+                             event.target.id(),
+                             &format!(
+                                 "@{} NMYSL!",
+                                 event.commenter_user_login
+                             ),
+                )
+            } else {
+                self.comment(repo, event.target.id(), &format!("发生甚么事了"))
+            }
         }
+            .await
     }
 }
 
