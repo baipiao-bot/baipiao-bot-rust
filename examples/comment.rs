@@ -35,7 +35,7 @@ impl Bot for CommentBot {
         self.comment(
             repo,
             event.id,
-            "我 劝 开发者耗子为之，耗耗反思，不要再犯这样的错误，小错误啊",
+            "我 劝 开发者耗子尾汁，耗耗反思，不要再犯这样的错误，小错误啊",
         )
         .await
     }
