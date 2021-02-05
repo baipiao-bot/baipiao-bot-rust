@@ -150,7 +150,7 @@ impl<T: Bot> Dispatcher<T> {
                 self.core.on_issue_created(repo, inner_event).await;
             }
             "closed" => {
-                let id = event["event"]["id"]["issue"]["number"].as_u64().unwrap() as usize;
+                let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
                 self.core.on_issue_closed(repo, id).await;
             }
             "updated" => {
@@ -226,7 +226,7 @@ impl<T: Bot> Dispatcher<T> {
                 self.core.on_pull_request_created(repo, inner_event).await;
             }
             "closed" => {
-                let id = event["event"]["id"]["issue"]["number"].as_u64().unwrap() as usize;
+                let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
                 self.core.on_pull_request_closed(repo, id).await;
             }
             "edited" => {
