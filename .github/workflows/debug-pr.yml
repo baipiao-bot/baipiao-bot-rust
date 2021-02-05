@@ -1,0 +1,15 @@
+name: Execute on everything
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+
+jobs:
+  say-hi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Print
+        run: |
+          echo "${JSON}"
+        env:
+          JSON: ${{ toJson(github) }}
+          BAIPIAO_BOT_TOKEN: ${{ secrets.BAIPIAO_BOT_TOKEN }}

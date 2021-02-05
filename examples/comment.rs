@@ -71,6 +71,7 @@ async fn main() {
     let bot = CommentBot::new(token);
     let dispatcher = Dispatcher::new(bot);
     let content = env::args().nth(1).unwrap();
+    println!("{:?}", content);
     let input: serde_json::Value = serde_json::from_str(&content).unwrap();
     dispatcher.dispatch_event(input).await;
 }
