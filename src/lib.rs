@@ -60,6 +60,7 @@ impl CommentTarget {
 #[derive(Debug)]
 pub struct CommentCreatedEvent {
     pub id: usize,
+    pub user: String,
     pub target: CommentTarget,
     pub body: String,
 }
@@ -67,6 +68,7 @@ pub struct CommentCreatedEvent {
 #[derive(Debug)]
 pub struct CommentUpdatedEvent {
     pub id: usize,
+    pub user: String,
     pub target: CommentTarget,
     pub from: String,
     pub to: String,
@@ -150,7 +152,7 @@ impl<T: Bot> Dispatcher<T> {
                 self.core.on_issue_created(repo, inner_event).await;
             }
             "closed" => {
-                let id = event["event"]["id"]["issue"]["number"].as_u64().unwrap() as usize;
+                let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
                 self.core.on_issue_closed(repo, id).await;
             }
             "updated" => {
@@ -226,7 +228,7 @@ impl<T: Bot> Dispatcher<T> {
                 self.core.on_pull_request_created(repo, inner_event).await;
             }
             "closed" => {
-                let id = event["event"]["id"]["issue"]["number"].as_u64().unwrap() as usize;
+                let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
                 self.core.on_pull_request_closed(repo, id).await;
             }
             "edited" => {
@@ -291,6 +293,10 @@ impl<T: Bot> Dispatcher<T> {
             "created" => {
                 let inner_event = CommentCreatedEvent {
                     id: event["event"]["comment"]["id"].as_u64().unwrap() as usize,
+                    user: event["event"]["comment"]["user"]["login"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
                     target,
                     body: event["event"]["comment"]["body"]
                         .as_str()
@@ -306,6 +312,10 @@ impl<T: Bot> Dispatcher<T> {
             "edited" => {
                 let inner_event = CommentUpdatedEvent {
                     id: event["event"]["comment"]["id"].as_u64().unwrap() as usize,
+                    user: event["event"]["comment"]["user"]["login"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
                     target,
                     from: event["event"]["changes"]["from"]
                         .as_str()

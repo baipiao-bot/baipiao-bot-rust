@@ -4,7 +4,6 @@ use baipiao_bot_rust::{
 };
 use octocrab::{Octocrab, OctocrabBuilder};
 use std::env;
-use std::io::Read;
 
 struct CommentBot {
     github_client: Octocrab,
@@ -35,7 +34,7 @@ impl Bot for CommentBot {
         self.comment(
             repo,
             event.id,
-            "我 劝 开发者耗子为之，耗耗反思，不要再犯这样的错误，小错误啊",
+            "我 劝 开发者耗子尾汁，耗耗反思，不要再犯这样的错误，小错误啊",
         )
         .await
     }
@@ -59,8 +58,12 @@ impl Bot for CommentBot {
 
     async fn on_comment_created(&self, repo: Repository, event: CommentCreatedEvent) {
         if event.body.contains("@baipiao-bot") {
-            self.comment(repo, event.target.id(), &format!("发生甚么事了"))
-                .await
+            self.comment(
+                repo,
+                event.target.id(),
+                &format!("@{} 发生甚么事了", event.user),
+            )
+            .await
         }
     }
 }
@@ -70,7 +73,7 @@ async fn main() {
     let token = env::var("BAIPIAO_BOT_TOKEN").unwrap();
     let bot = CommentBot::new(token);
     let dispatcher = Dispatcher::new(bot);
-    let content = env::args().nth(1).unwrap();
+    let content = env::var("JSON").unwrap();
     let input: serde_json::Value = serde_json::from_str(&content).unwrap();
     dispatcher.dispatch_event(input).await;
 }

@@ -8,8 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run the bot
-        uses: docker://longfangsong/baipiao-bot-rust:latest
-        with:
-          args: ${{ github }}
+        uses: docker://baipiaobot/baipiao-bot-rust:latest
         env:
+          JSON: ${{ toJson(github) }}
           BAIPIAO_BOT_TOKEN: ${{ secrets.BAIPIAO_BOT_TOKEN }}
