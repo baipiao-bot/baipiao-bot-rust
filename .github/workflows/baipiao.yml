@@ -1,0 +1,15 @@
+name: make baipiao bot work
+on:
+  - issues
+  - issue_comment
+
+jobs:
+  run-baipiao-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run the bot
+        uses: docker://longfangsong/baipiao-bot-rust:latest
+        with:
+          args: ${{ github }}
+        env:
+          BAIPIAO_BOT_TOKEN: ${{ secrets.BAIPIAO_BOT_TOKEN }}
