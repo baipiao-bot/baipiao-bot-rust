@@ -33,6 +33,9 @@ pub struct PullRequestCreatedEvent {
     pub title: String,
     pub body: String,
     pub user: String,
+    pub from_repo: Repository,
+    pub from_ref: String,
+    pub to_ref: String,
 }
 
 #[derive(Debug)]
@@ -119,19 +122,7 @@ impl<T: Bot> Dispatcher<T> {
 
     async fn dispatch_issues_event(&self, event: serde_json::Value) {
         let event_action: &str = event["event"]["action"].as_str().unwrap();
-        let repo = Repository {
-            owner: event["event"]["repository"]["owner"]["login"]
-                .as_str()
-                .unwrap()
-                .to_string(),
-            name: event["repository"]
-                .as_str()
-                .unwrap()
-                .split('/')
-                .nth(1)
-                .unwrap()
-                .to_string(),
-        };
+        let repo = Self::extract_repo_info(&event);
         match event_action {
             "opened" => {
                 let inner_event = IssueCreatedEvent {
@@ -194,19 +185,7 @@ impl<T: Bot> Dispatcher<T> {
     }
 
     async fn dispatch_pull_request_event(&self, event: serde_json::Value) {
-        let repo = Repository {
-            owner: event["event"]["repository"]["owner"]["login"]
-                .as_str()
-                .unwrap()
-                .to_string(),
-            name: event["repository"]
-                .as_str()
-                .unwrap()
-                .split('/')
-                .nth(1)
-                .unwrap()
-                .to_string(),
-        };
+        let repo = Self::extract_repo_info(&event);
         let event_action: &str = event["event"]["action"].as_str().unwrap();
         match event_action {
             "opened" => {
@@ -224,6 +203,18 @@ impl<T: Bot> Dispatcher<T> {
                         .as_str()
                         .unwrap()
                         .to_string(),
+                    from_repo: Repository {
+                        owner: event["event"]["pull_request"]["head"]["user"]["login"]
+                            .as_str()
+                            .unwrap()
+                            .to_string(),
+                        name: event["event"]["pull_request"]["head"]["repo"]["name"]
+                            .as_str()
+                            .unwrap()
+                            .to_string(),
+                    },
+                    from_ref: event["head_ref"].as_str().unwrap().to_string(),
+                    to_ref: event["base_ref"].as_str().unwrap().to_string(),
                 };
                 self.core.on_pull_request_created(repo, inner_event).await;
             }
@@ -270,19 +261,7 @@ impl<T: Bot> Dispatcher<T> {
     }
 
     async fn dispatch_issue_comment_event(&self, event: serde_json::Value) {
-        let repo = Repository {
-            owner: event["event"]["repository"]["owner"]["login"]
-                .as_str()
-                .unwrap()
-                .to_string(),
-            name: event["repository"]
-                .as_str()
-                .unwrap()
-                .split('/')
-                .nth(1)
-                .unwrap()
-                .to_string(),
-        };
+        let repo = Self::extract_repo_info(&event);
         let event_action: &str = event["event"]["action"].as_str().unwrap();
         let target = if event["event"]["issue"].get("pull_request").is_some() {
             CommentTarget::PullRequest(event["event"]["issue"]["number"].as_u64().unwrap() as _)
@@ -329,6 +308,22 @@ impl<T: Bot> Dispatcher<T> {
                 self.core.on_comment_updated(repo, inner_event).await;
             }
             _ => unimplemented!(),
+        }
+    }
+
+    fn extract_repo_info(event: &serde_json::Value) -> Repository {
+        Repository {
+            owner: event["event"]["repository"]["owner"]["login"]
+                .as_str()
+                .unwrap()
+                .to_string(),
+            name: event["repository"]
+                .as_str()
+                .unwrap()
+                .split('/')
+                .nth(1)
+                .unwrap()
+                .to_string(),
         }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "baipiao-bot-rust"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["longfangsong <longfangsong@icloud.com>"]
 edition = "2018"
 description = "A simple rust bot based on GitHub Action, total free, no server required"
