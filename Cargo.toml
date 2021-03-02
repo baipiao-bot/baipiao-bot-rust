@@ -1,6 +1,6 @@
 [package]
 name = "baipiao-bot-rust"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["longfangsong <longfangsong@icloud.com>"]
 edition = "2018"
 description = "A simple rust bot based on GitHub Action, total free, no server required"
@@ -10,10 +10,9 @@ license = "Unlicense"
 path = "src/lib.rs"
 
 [dependencies]
-serde_json = "1.0.59"
-async-trait = "0.1.41"
+serde_json = "1.0.64"
+async-trait = "0.1.42"
 
 [dev-dependencies]
-tokio = { version = "1.1.1", features = ["macros", "rt-multi-thread"] }
-octocrab = "0.7.0"
-
+tokio = { version = "1.2.0", features = ["macros", "rt-multi-thread"] }
+octocrab = "0.8.11"

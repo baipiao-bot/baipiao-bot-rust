@@ -28,6 +28,14 @@ pub struct IssueUpdatedEvent {
 }
 
 #[derive(Debug)]
+pub struct IssueReopenedEvent {
+    pub id: usize,
+    pub title: String,
+    pub body: String,
+    pub user: String,
+}
+
+#[derive(Debug)]
 pub struct PullRequestCreatedEvent {
     pub id: usize,
     pub title: String,
@@ -84,6 +92,8 @@ pub trait Bot: Send + Sync {
     async fn on_issue_updated(&self, _repo: Repository, _event: IssueUpdatedEvent) {}
 
     async fn on_issue_closed(&self, _repo: Repository, _issue_id: usize) {}
+
+    async fn on_issue_reopened(&self, _repo: Repository, _event: IssueReopenedEvent) {}
 
     async fn on_pull_request_created(&self, _repo: Repository, _event: PullRequestCreatedEvent) {}
 
@@ -179,6 +189,24 @@ impl<T: Bot> Dispatcher<T> {
                         .to_string(),
                 };
                 self.core.on_issue_updated(repo, inner_event).await;
+            }
+            "reopened" => {
+                let inner_event = IssueReopenedEvent {
+                    id: event["event"]["issue"]["number"].as_u64().unwrap() as _,
+                    title: event["event"]["issue"]["title"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                    body: event["event"]["issue"]["body"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                    user: event["event"]["issue"]["user"]["login"]
+                        .as_str()
+                        .unwrap()
+                        .to_string(),
+                };
+                self.core.on_issue_reopened(repo, inner_event).await;
             }
             _ => unimplemented!(),
         }
