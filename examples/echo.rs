@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use baipiao_bot_rust::{
     Bot, CommentCreatedEvent, CommentUpdatedEvent, Dispatcher, IssueCreatedEvent,
     IssueUpdatedEvent, PullRequestCreatedEvent, PullRequestUpdatedEvent, Repository,
+    RunningInfo
 };
 use std::io::Read;
 
@@ -9,39 +10,57 @@ struct EchoBot;
 
 #[async_trait]
 impl Bot for EchoBot {
-    async fn on_issue_created(&self, repo: Repository, event: IssueCreatedEvent) {
+    async fn on_issue_created(&self, repo: Repository,
+                              _running_info: RunningInfo,
+                              event: IssueCreatedEvent) {
         println!("on_issue_created: {:?}, {:?}", repo, event)
     }
 
-    async fn on_issue_updated(&self, repo: Repository, event: IssueUpdatedEvent) {
+    async fn on_issue_updated(&self, repo: Repository,
+                              _running_info: RunningInfo,
+                              event: IssueUpdatedEvent) {
         println!("on_issue_updated: {:?}, {:?}", repo, event)
     }
 
-    async fn on_issue_closed(&self, repo: Repository, issue_id: usize) {
+    async fn on_issue_closed(&self, repo: Repository,
+                             _running_info: RunningInfo,
+                             issue_id: usize) {
         println!("on_issue_closed: {:?}, {:?}", repo, issue_id)
     }
 
-    async fn on_pull_request_created(&self, repo: Repository, event: PullRequestCreatedEvent) {
+    async fn on_pull_request_created(&self, repo: Repository,
+                                     _running_info: RunningInfo,
+                                     event: PullRequestCreatedEvent) {
         println!("on_pull_request_created: {:?}, {:?}", repo, event)
     }
 
-    async fn on_pull_request_updated(&self, repo: Repository, event: PullRequestUpdatedEvent) {
+    async fn on_pull_request_updated(&self, repo: Repository,
+                                     _running_info: RunningInfo,
+                                     event: PullRequestUpdatedEvent) {
         println!("on_pull_request_updated: {:?}, {:?}", repo, event)
     }
 
-    async fn on_pull_request_closed(&self, repo: Repository, pull_request_id: usize) {
+    async fn on_pull_request_closed(&self, repo: Repository,
+                                    _running_info: RunningInfo,
+                                    pull_request_id: usize) {
         println!("on_pull_request_closed: {:?}, {:?}", repo, pull_request_id)
     }
 
-    async fn on_comment_created(&self, repo: Repository, event: CommentCreatedEvent) {
+    async fn on_comment_created(&self, repo: Repository,
+                                _running_info: RunningInfo,
+                                event: CommentCreatedEvent) {
         println!("on_comment_created: {:?}, {:?}", repo, event)
     }
 
-    async fn on_comment_updated(&self, repo: Repository, event: CommentUpdatedEvent) {
+    async fn on_comment_updated(&self, repo: Repository,
+                                _running_info: RunningInfo,
+                                event: CommentUpdatedEvent) {
         println!("on_comment_updated: {:?}, {:?}", repo, event)
     }
 
-    async fn on_comment_deleted(&self, repo: Repository, comment_id: usize) {
+    async fn on_comment_deleted(&self, repo: Repository,
+                                _running_info: RunningInfo,
+                                comment_id: usize) {
         println!("on_comment_deleted: {:?}, {:?}", repo, comment_id)
     }
 }

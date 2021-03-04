@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use baipiao_bot_rust::{
     Bot, CommentCreatedEvent, Dispatcher, IssueCreatedEvent, PullRequestCreatedEvent, Repository,
+    RunningInfo
 };
 use octocrab::{Octocrab, OctocrabBuilder};
 use std::env;
@@ -30,7 +31,9 @@ impl CommentBot {
 
 #[async_trait]
 impl Bot for CommentBot {
-    async fn on_issue_created(&self, repo: Repository, event: IssueCreatedEvent) {
+    async fn on_issue_created(&self, repo: Repository,
+                              _running_info: RunningInfo,
+                              event: IssueCreatedEvent) {
         self.comment(
             repo,
             event.id,
@@ -39,12 +42,16 @@ impl Bot for CommentBot {
         .await
     }
 
-    async fn on_issue_closed(&self, repo: Repository, issue_id: usize) {
+    async fn on_issue_closed(&self, repo: Repository,
+                             _running_info: RunningInfo,
+                             issue_id: usize) {
         self.comment(repo, issue_id, "我啪的一下就修好了，很快啊")
             .await
     }
 
-    async fn on_pull_request_created(&self, repo: Repository, event: PullRequestCreatedEvent) {
+    async fn on_pull_request_created(&self, repo: Repository,
+                                     _running_info: RunningInfo,
+                                     event: PullRequestCreatedEvent) {
         self.comment(
             repo,
             event.id,
@@ -56,7 +63,9 @@ impl Bot for CommentBot {
         .await
     }
 
-    async fn on_comment_created(&self, repo: Repository, event: CommentCreatedEvent) {
+    async fn on_comment_created(&self, repo: Repository,
+                                _running_info: RunningInfo,
+                                event: CommentCreatedEvent) {
         if event.body.contains("@baipiao-bot") {
             self.comment(
                 repo,

@@ -85,27 +85,93 @@ pub struct CommentUpdatedEvent {
     pub to: String,
 }
 
+#[derive(Debug)]
+pub struct RunningInfo {
+    pub run_id: usize,
+    pub run_number: usize,
+}
+
 #[async_trait]
 pub trait Bot: Send + Sync {
-    async fn on_issue_created(&self, _repo: Repository, _event: IssueCreatedEvent) {}
+    async fn on_issue_created(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: IssueCreatedEvent,
+    ) {
+    }
 
-    async fn on_issue_updated(&self, _repo: Repository, _event: IssueUpdatedEvent) {}
+    async fn on_issue_updated(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: IssueUpdatedEvent,
+    ) {
+    }
 
-    async fn on_issue_closed(&self, _repo: Repository, _issue_id: usize) {}
+    async fn on_issue_closed(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _issue_id: usize,
+    ) {
+    }
 
-    async fn on_issue_reopened(&self, _repo: Repository, _event: IssueReopenedEvent) {}
+    async fn on_issue_reopened(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: IssueReopenedEvent,
+    ) {
+    }
 
-    async fn on_pull_request_created(&self, _repo: Repository, _event: PullRequestCreatedEvent) {}
+    async fn on_pull_request_created(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: PullRequestCreatedEvent,
+    ) {
+    }
 
-    async fn on_pull_request_updated(&self, _repo: Repository, _event: PullRequestUpdatedEvent) {}
+    async fn on_pull_request_updated(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: PullRequestUpdatedEvent,
+    ) {
+    }
 
-    async fn on_pull_request_closed(&self, _repo: Repository, _pull_request_id: usize) {}
+    async fn on_pull_request_closed(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _pull_request_id: usize,
+    ) {
+    }
 
-    async fn on_comment_created(&self, _repo: Repository, _event: CommentCreatedEvent) {}
+    async fn on_comment_created(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: CommentCreatedEvent,
+    ) {
+    }
 
-    async fn on_comment_updated(&self, _repo: Repository, _event: CommentUpdatedEvent) {}
+    async fn on_comment_updated(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _event: CommentUpdatedEvent,
+    ) {
+    }
 
-    async fn on_comment_deleted(&self, _repo: Repository, _comment_id: usize) {}
+    async fn on_comment_deleted(
+        &self,
+        _repo: Repository,
+        _running_info: RunningInfo,
+        _comment_id: usize,
+    ) {
+    }
 }
 
 pub struct Dispatcher<T: Bot> {
@@ -133,6 +199,7 @@ impl<T: Bot> Dispatcher<T> {
     async fn dispatch_issues_event(&self, event: serde_json::Value) {
         let event_action: &str = event["event"]["action"].as_str().unwrap();
         let repo = Self::extract_repo_info(&event);
+        let running_info = Self::extract_running_info(&event);
         match event_action {
             "opened" => {
                 let inner_event = IssueCreatedEvent {
@@ -150,11 +217,13 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_issue_created(repo, inner_event).await;
+                self.core
+                    .on_issue_created(repo, running_info, inner_event)
+                    .await;
             }
             "closed" => {
                 let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
-                self.core.on_issue_closed(repo, id).await;
+                self.core.on_issue_closed(repo, running_info, id).await;
             }
             "updated" => {
                 let updated_part = if event["event"]["changes"].get("body").is_some() {
@@ -188,7 +257,9 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_issue_updated(repo, inner_event).await;
+                self.core
+                    .on_issue_updated(repo, running_info, inner_event)
+                    .await;
             }
             "reopened" => {
                 let inner_event = IssueReopenedEvent {
@@ -206,7 +277,9 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_issue_reopened(repo, inner_event).await;
+                self.core
+                    .on_issue_reopened(repo, running_info, inner_event)
+                    .await;
             }
             _ => unimplemented!(),
         }
@@ -215,6 +288,7 @@ impl<T: Bot> Dispatcher<T> {
     async fn dispatch_pull_request_event(&self, event: serde_json::Value) {
         let repo = Self::extract_repo_info(&event);
         let event_action: &str = event["event"]["action"].as_str().unwrap();
+        let running_info = Self::extract_running_info(&event);
         match event_action {
             "opened" => {
                 let inner_event = PullRequestCreatedEvent {
@@ -244,11 +318,15 @@ impl<T: Bot> Dispatcher<T> {
                     from_ref: event["head_ref"].as_str().unwrap().to_string(),
                     to_ref: event["base_ref"].as_str().unwrap().to_string(),
                 };
-                self.core.on_pull_request_created(repo, inner_event).await;
+                self.core
+                    .on_pull_request_created(repo, running_info, inner_event)
+                    .await;
             }
             "closed" => {
                 let id = event["event"]["issue"]["number"].as_u64().unwrap() as usize;
-                self.core.on_pull_request_closed(repo, id).await;
+                self.core
+                    .on_pull_request_closed(repo, running_info, id)
+                    .await;
             }
             "edited" => {
                 let updated_part = if event["event"]["changes"].get("body").is_some() {
@@ -282,7 +360,9 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_pull_request_updated(repo, inner_event).await;
+                self.core
+                    .on_pull_request_updated(repo, running_info, inner_event)
+                    .await;
             }
             _ => unimplemented!(),
         }
@@ -291,6 +371,7 @@ impl<T: Bot> Dispatcher<T> {
     async fn dispatch_issue_comment_event(&self, event: serde_json::Value) {
         let repo = Self::extract_repo_info(&event);
         let event_action: &str = event["event"]["action"].as_str().unwrap();
+        let running_info = Self::extract_running_info(&event);
         let target = if event["event"]["issue"].get("pull_request").is_some() {
             CommentTarget::PullRequest(event["event"]["issue"]["number"].as_u64().unwrap() as _)
         } else {
@@ -310,11 +391,13 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_comment_created(repo, inner_event).await;
+                self.core
+                    .on_comment_created(repo, running_info, inner_event)
+                    .await;
             }
             "deleted" => {
                 let id = event["event"]["comment"]["id"].as_u64().unwrap() as usize;
-                self.core.on_comment_deleted(repo, id).await;
+                self.core.on_comment_deleted(repo, running_info, id).await;
             }
             "edited" => {
                 let inner_event = CommentUpdatedEvent {
@@ -333,7 +416,9 @@ impl<T: Bot> Dispatcher<T> {
                         .unwrap()
                         .to_string(),
                 };
-                self.core.on_comment_updated(repo, inner_event).await;
+                self.core
+                    .on_comment_updated(repo, running_info, inner_event)
+                    .await;
             }
             _ => unimplemented!(),
         }
@@ -352,6 +437,13 @@ impl<T: Bot> Dispatcher<T> {
                 .nth(1)
                 .unwrap()
                 .to_string(),
+        }
+    }
+
+    fn extract_running_info(event: &serde_json::Value) -> RunningInfo {
+        RunningInfo {
+            run_id: usize::from_str_radix(event["run_id"].as_str().unwrap(), 10).unwrap(),
+            run_number: usize::from_str_radix(event["run_number"].as_str().unwrap(), 10).unwrap(),
         }
     }
 }
